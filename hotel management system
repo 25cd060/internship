@@ -1,0 +1,202 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+
+using namespace std;
+
+class Room {
+private:
+    int roomNumber;
+    string customerName;
+    bool booked;
+
+public:
+    Room() {
+        roomNumber = 0;
+        customerName = "";
+        booked = false;
+    }
+
+    void bookRoom(int roomNo, string name) {
+        roomNumber = roomNo;
+        customerName = name;
+        booked = true;
+    }
+
+    void checkoutRoom() {
+        customerName = "";
+        booked = false;
+    }
+
+    int getRoomNumber() {
+        return roomNumber;
+    }
+
+    string getCustomerName() {
+        return customerName;
+    }
+
+    bool isBooked() {
+        return booked;
+    }
+};
+
+void bookRoom() {
+    int roomNo;
+    string name;
+
+    cout << "Enter Room Number: ";
+    cin >> roomNo;
+
+    ifstream fin("hotel.txt");
+    int r;
+    string n;
+
+    while (fin >> r) {
+        fin.ignore();
+        getline(fin, n);
+
+        if (r == roomNo) {
+            cout << "Room already booked!\n";
+            fin.close();
+            return;
+        }
+    }
+    fin.close();
+
+    cout << "Enter Customer Name: ";
+    cin.ignore();
+    getline(cin, name);
+
+    ofstream fout("hotel.txt", ios::app);
+    fout << roomNo << " " << name << endl;
+    fout.close();
+
+    cout << "Room booked successfully!\n";
+}
+
+void searchRoom() {
+    int roomNo;
+    cout << "Enter Room Number to Search: ";
+    cin >> roomNo;
+
+    ifstream fin("hotel.txt");
+    int r;
+    string name;
+    bool found = false;
+
+    while (fin >> r) {
+        fin.ignore();
+        getline(fin, name);
+
+        if (r == roomNo) {
+            cout << "\nRoom Number : " << r << endl;
+            cout << "Customer Name : " << name << endl;
+            found = true;
+            break;
+        }
+    }
+
+    fin.close();
+
+    if (!found)
+        cout << "Room not found!\n";
+}
+
+void checkoutRoom() {
+    int roomNo;
+    cout << "Enter Room Number to Checkout: ";
+    cin >> roomNo;
+
+    ifstream fin("hotel.txt");
+    ofstream temp("temp.txt");
+
+    int r;
+    string name;
+    bool found = false;
+
+    while (fin >> r) {
+        fin.ignore();
+        getline(fin, name);
+
+        if (r == roomNo) {
+            found = true;
+            continue;
+        }
+
+        temp << r << " " << name << endl;
+    }
+
+    fin.close();
+    temp.close();
+
+    remove("hotel.txt");
+    rename("temp.txt", "hotel.txt");
+
+    if (found)
+        cout << "Checkout successful!\n";
+    else
+        cout << "Room not found!\n";
+}
+
+void displayAll() {
+    ifstream fin("hotel.txt");
+
+    int roomNo;
+    string name;
+
+    cout << "\n----- BOOKED ROOMS -----\n";
+
+    while (fin >> roomNo) {
+        fin.ignore();
+        getline(fin, name);
+
+        cout << "Room No: " << roomNo
+             << " | Customer: " << name << endl;
+    }
+
+    fin.close();
+}
+
+int main() {
+    int choice;
+
+    do {
+        cout << "\n===== HOTEL MANAGEMENT SYSTEM =====\n";
+        cout << "1. Book Room\n";
+        cout << "2. Search Room\n";
+        cout << "3. Checkout Room\n";
+        cout << "4. Display All Bookings\n";
+        cout << "5. Exit\n";
+        cout << "Enter Choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1:
+                bookRoom();
+                break;
+
+            case 2:
+                searchRoom();
+                break;
+
+            case 3:
+                checkoutRoom();
+                break;
+
+            case 4:
+                displayAll();
+                break;
+
+            case 5:
+                cout << "Thank You!\n";
+                break;
+
+            default:
+                cout << "Invalid Choice!\n";
+        }
+
+    } while (choice != 5);
+
+    return 0;
+}
